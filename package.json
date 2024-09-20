@@ -1,0 +1,38 @@
+{
+  "name": "@jtjs/networking",
+  "version": "2.0.0",
+  "description": "Utilities for performing networking tasks.",
+  "type": "module",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/jtjs_networking.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/jtjs_networking.js"
+      }
+    }
+  },
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && npm run build:types",
+    "build:types": "tsc --project tsconfig.build.json",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "peerDependencies": {
+    "@jtjs/event": "^2.0.0",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "happy-dom": "^15.7.4",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.1",
+    "vitest": "^2.1.1"
+  }
+}
