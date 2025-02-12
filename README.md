@@ -1,7 +1,3 @@
 # @jtjs/networking
 
-An addition to the JTJS library suite that provides easy-to-use network clients.
-
-## Currently Included
-`FetchHttpClient`
-`HttpStatus`
+Our documentation got a glow-up! You can now find all JTJS documentation at [jtjs.dev](https://jtjs.dev).
