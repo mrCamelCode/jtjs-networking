@@ -31,6 +31,10 @@ class MockResponseObject {
 }
 
 describe('FetchHttpClient', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   test('throws error when trying to create a client with a path that does not start with a /', () => {
     expect(() => {
       new FetchHttpClient({
@@ -522,6 +526,60 @@ describe('FetchHttpClient', () => {
 
         expect(handleError).toHaveBeenCalledTimes(1);
         expect(handleError).toHaveBeenCalledWith(new Error('Boom!'));
+      });
+    });
+  });
+
+  describe('rate limiting', () => {
+    test(`a new request is not made if sufficient time hasn't passed`, async () => {
+      const http = new FetchHttpClient({
+        rateLimitMs: 1_000,
+      });
+
+      const promises = [http.get('/somewhere'), http.get('/another-place'), http.get('/somewhere/else')];
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      await Promise.all(promises);
+    });
+    test(`requests are made in the order received`, async () => {
+      const http = new FetchHttpClient({
+        rateLimitMs: 50,
+      });
+
+      await Promise.all([http.get('/somewhere'), http.get('/another-place'), http.get('/somewhere/else')]);
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+      expect(mockFetch.mock.calls[0][0]).toBe('/somewhere');
+      expect(mockFetch.mock.calls[1][0]).toBe('/another-place');
+      expect(mockFetch.mock.calls[2][0]).toBe('/somewhere/else');
+    });
+
+    describe('no limiting...', () => {
+      test(`on first request`, async () => {
+        const http = new FetchHttpClient({
+          rateLimitMs: 50,
+        });
+
+        http.get('/somewhere');
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+
+        http.get('/somewhere');
+
+        // Not called again because it should be waiting to make the call.
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+      });
+      test(`when there is no configured rate limit`, async () => {
+        const http = new FetchHttpClient();
+
+        http.get('/somewhere');
+
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+
+        http.get('/somewhere');
+       
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       });
     });
   });
